@@ -8,9 +8,10 @@ async function cargarEmpleados() {
 
         empleados.forEach(emp => {
             let fila = tabla.insertRow();
-            fila.insertCell(0).textContent = emp.id;
-            fila.insertCell(1).textContent = emp.Nombre;
-            fila.insertCell(2).textContent = emp.Salario;
+            //console.log(emp);
+            fila.insertCell(0).textContent = emp.tablaID;
+            fila.insertCell(1).textContent = emp.tablaNombre;
+            fila.insertCell(2).textContent = emp.tablaSalario;
         });
     } catch (error) {
         console.error("Error al cargar empleados:", error);
@@ -26,18 +27,25 @@ async function insertarEmpleado() {
     errorNombre.textContent = "";
     errorSalario.textContent = "";
 
-    let respuesta = await fetch("http://localhost:3000/empleados", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Nombre: nombre, Salario: salario })
-    });
+    try {
+        let respuesta = await fetch("http://localhost:3000/empleados", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ Nombre: nombre, Salario: salario })
+        });
 
-    let resultado = await respuesta.json();
+        let resultado = await respuesta.json();
 
-    if (respuesta.ok) {
-        alert("Empleado agregado con éxito");
-        window.location.href = "index.html"; // Regresar y refrescar tabla
-    } else {
-        alert("Nombre de Empleado ya existe.");
+        if (resultado.codigo === 0) {
+            alert("Empleado agregado con éxito");
+            window.location.href = "index.html"; // Regresar y refrescar tabla
+        } else if (resultado.codigo === 50001) {
+            alert("Nombre de empleado ya existe");
+        } else {
+            alert("Error al insertar empleado");
+        }
+    } catch (error) {
+        console.error("Error al insertar empleado:", error);
+        alert("Error al insertar empleado");
     }
 }

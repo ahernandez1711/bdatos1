@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Para procesar JSON en las solicitudes POST
 
-// Configurar conexión a la BD
+// Configura la conexión a la BD
 const bdconnection = {
     user: "pruebasDB",
     password: "BD1g22025*",
@@ -19,7 +19,7 @@ const bdconnection = {
     }
 };
 
-// Función para conectar con SQL Server
+// Esta función conecta con el sql
 async function getConnection() {
     try {
         return await mssql.connect(bdconnection);
@@ -32,7 +32,8 @@ async function getConnection() {
 app.get("/empleados", async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request().query("SELECT id, Nombre, Salario FROM Empleado");
+        const result = await pool.request().execute("sp_GetEmpleados");
+        //Usar Aliases de la base de datos
         res.json(result.recordset);
     } catch (error) {
         res.status(500).send("Error al obtener empleados");
@@ -45,23 +46,32 @@ app.post("/empleados", async (req, res) => {
         const { Nombre, Salario } = req.body;
 
         if (!Nombre || !Salario) {
-            return res.status(400).send("Faltan datos");
+            return res.status(400).json({ mensaje: "Faltan datos" });
         }
 
         const pool = await getConnection();
-        await pool.request()
-            .input("inNombre", mssql.VarChar(64), Nombre)
-            .input("inSalario", mssql.Money, Salario)
-            .execute("sp_InsertEmpleado"); // Ejecutamos el procedimiento almacenado
+        const request = pool.request();
+        request.input("inNombre", mssql.VarChar(64), Nombre);
+        request.input("inSalario", mssql.Money, Salario);
 
-        res.status(201).send("Empleado insertado correctamente");
+        // Ejecuta el procedimiento almacenado y obtiene el código de resultado
+        const result = await request.execute("sp_InsertEmpleado");
+        const outResultCode = result.returnValue;
+
+        if (outResultCode === 0) {
+            res.status(201).json({ mensaje: "Empleado insertado correctamente", codigo: outResultCode });
+        } else if (outResultCode === 50001) {
+            res.status(400).json({ mensaje: "Nombre de empleado ya existe", codigo: outResultCode });
+        } else {
+            res.status(500).json({ mensaje: "Error al insertar empleado", codigo: outResultCode });
+        }
     } catch (error) {
         console.error("Error al insertar empleado:", error);
-        res.status(500).send("Error al insertar empleado");
+        res.status(500).json({ mensaje: "Error al insertar empleado", codigo: 50005 });
     }
 });
 
-// Iniciar el servidor en el puerto 3000
+// Inicia el servidor en el puerto 3000
 app.listen(3000, () => {
     console.log("Servidor corriendo en http://localhost:3000");
 });
