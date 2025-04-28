@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimientos del Empleado</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body onload="cargarMovimientos()">
+
+    <h1>Movimientos del Empleado</h1>
+
+    <table id="tabla-movimientos">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo Movimiento</th>
+                <th>Monto</th>
+                <th>Nuevo Saldo</th>
+                <th>Registrado Por</th>
+                <th>IP</th>
+                <th>Hora Registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Movimientos se llenan dinámicamente -->
+        </tbody>
+    </table>
+
+    <br>
+    <button onclick="irInsertarMovimiento()">Insertar Movimiento</button>
+    <br><br>
+    <button onclick="window.history.back()">Regresar</button>
+
+</body>
+</html>

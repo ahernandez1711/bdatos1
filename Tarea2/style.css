@@ -1,0 +1,28 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    width: 40%;
+
+}
+
+th, td {
+    border: 2px solid black;
+    padding: 13px;
+}
+
+button {
+    width: 180px;  /* Ancho */
+    height: 50px;  /* Alto */
+    font-size: 16px; /* Tamaño del texto */
+    padding: 5px; /* Espaciado interno */
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+}

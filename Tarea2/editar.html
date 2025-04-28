@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Empleado</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body onload="cargarEmpleadoPorId()">
+
+    <h1>Actualizar Empleado</h1>
+
+    <form id="form-actualizar" onsubmit="event.preventDefault(); actualizarEmpleado();">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+
+        <label for="documento">Documento Identidad:</label>
+        <input type="text" id="documento" name="documento" required><br><br>
+
+        <label for="idPuesto">ID Puesto:</label>
+        <input type="number" id="idPuesto" name="idPuesto" required><br><br>
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    <br>
+    <button onclick="window.history.back()">Cancelar</button>
+
+</body>
+</html>
