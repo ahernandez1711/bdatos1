@@ -77,14 +77,17 @@ async function cargarEmpleadoDetalle() {
     }
 
     try {
-        const respuesta = await fetch(`http://localhost:3000/empleados/${id}`);
+        const respuesta = await fetch(`http://localhost:3000/empleados/${id}`, {
+            cache: "no-store"
+        });
         const empleado = await respuesta.json();
 
         if (empleado) {
             document.getElementById("detalle-empleado").innerHTML = `
                 <p><strong>Nombre:</strong> ${empleado.Nombre}</p>
                 <p><strong>Documento Identidad:</strong> ${empleado.ValorDocumentoIdentidad}</p>
-                <p><strong>Id Puesto:</strong> ${empleado.idPuesto}</p>
+                <p><strong>Puesto:</strong> ${empleado.NombrePuesto}</p>
+                <p><strong>Saldo Vacaciones:</strong> ${empleado.SaldoVacaciones}</p>
             `;
         } else {
             alert("Empleado no encontrado");
@@ -207,6 +210,12 @@ async function insertarEmpleado() {
 // ================================
 // Funciones de Movimientos
 // ================================
+
+function irADetalleEmpleado() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    window.location.href = `empleado.html?id=${id}`;
+}
 
 function verMovimientos() {
     const params = new URLSearchParams(window.location.search);

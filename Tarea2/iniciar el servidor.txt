@@ -1,0 +1,2 @@
+cd "C:\Carpetas de escritorio\TEC\BDD1\Tarea1"
+node server.js

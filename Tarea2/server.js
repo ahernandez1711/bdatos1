@@ -37,16 +37,31 @@ app.post("/login", async (req, res) => {
         const outResultCode = result.output.outResultCode;
         const outUserId = result.output.outUserId;
 
+        console.log("Resultado de ingresar:", outResultCode);
+
         if (outResultCode === 0) {
-            res.status(200).json({ mensaje: "Login exitoso", codigo: 0, userId: outUserId });
+            res.status(200).json({ 
+                mensaje: "Login exitoso", 
+                codigo: 0, 
+                userId: outUserId 
+            });
+        } else if (outResultCode === 50013) {
+            res.status(403).json({ 
+                mensaje: "Su cuenta ha sido bloqueada. Debe esperar 10 minutos para volver a intentarlo.", 
+                codigo: 50013 
+            });
         } else {
-            res.status(401).json({ mensaje: "Login fallido", codigo: outResultCode });
+            res.status(401).json({ 
+                mensaje: "Usuario o contraseña incorrectos.", 
+                codigo: outResultCode 
+            });
         }
     } catch (error) {
         console.error("Error en login:", error);
         res.status(500).json({ mensaje: "Error interno en login" });
     }
 });
+
 
 // ================================
 // Rutas - Empleados
@@ -76,16 +91,8 @@ app.get("/empleados/:id", async (req, res) => {
 
         const pool = await getConnection();
         const result = await pool.request()
-            .input("id", mssql.Int, id)
-            .query(`
-                SELECT 
-                    id,
-                    Nombre,
-                    ValorDocumentoIdentidad,
-                    idPuesto
-                FROM Empleado
-                WHERE id = @id AND EsActivo = 1
-            `);
+            .input("inIdEmpleado", mssql.Int, id)
+            .execute("sp_ConsultarEmpleado");
 
         if (result.recordset.length === 0) {
             return res.status(404).json({ mensaje: "Empleado no encontrado" });
@@ -97,6 +104,7 @@ app.get("/empleados/:id", async (req, res) => {
         res.status(500).json({ mensaje: "Error interno del servidor" });
     }
 });
+
 
 
 // Insertar un nuevo empleado
@@ -114,7 +122,7 @@ app.post("/empleados", async (req, res) => {
         request.input("inNombre", mssql.VarChar(64), Nombre);
         request.input("inIdPuesto", mssql.Int, IdPuesto);
         request.input("inPostIP", mssql.VarChar(64), req.ip || '127.0.0.1');
-        request.input("inPostByUserId", mssql.Int, 8);
+        request.input("inPostByUserId", mssql.Int, 1);
         request.output("outResultCode", mssql.Int);
 
         const result = await request.execute("sp_InsertarEmpleado");
@@ -149,7 +157,7 @@ app.put("/empleados/:id", async (req, res) => {
             .input("inNuevoNombre", mssql.VarChar(64), Nombre)
             .input("inNuevoIdPuesto", mssql.Int, IdPuesto)
             .input("inPostIP", mssql.VarChar(64), req.ip || '127.0.0.1')
-            .input("inPostByUserId", mssql.Int, 8)
+            .input("inPostByUserId", mssql.Int, 1)
             .output("outResultCode", mssql.Int)
             .execute("sp_ActualizarEmpleado");
 
@@ -177,7 +185,7 @@ app.delete("/empleados/:id", async (req, res) => {
             .input("inIdEmpleado", mssql.Int, id)
             .input("inConfirmacion", mssql.Bit, 1) // Confirmamción
             .input("inPostIP", mssql.VarChar(64), req.ip || '127.0.0.1')
-            .input("inPostByUserId", mssql.Int, 8) // usuario de prueba
+            .input("inPostByUserId", mssql.Int, 1) // usuario de prueba
             .output("outResultCode", mssql.Int)
             .execute("sp_EliminarEmpleado");
 
@@ -228,28 +236,45 @@ app.post('/movimientos', async (req, res) => {
 
         const pool = await getConnection();
 
+        // Buscar el ValorDocumentoIdentidad
+        const empleadoResult = await pool.request()
+            .input("inIdEmpleado", mssql.Int, EmpleadoId)
+            .execute("sp_ConsultarEmpleado");
+
+        const empleado = empleadoResult.recordset[0];
+
+        if (!empleado || !empleado.ValorDocumentoIdentidad) {
+            return res.status(404).json({ mensaje: "Empleado no encontrado", codigo: 404 });
+        }
+
+        const documentoIdentidad = empleado.ValorDocumentoIdentidad;
+
         const request = pool.request();
-        request.input("inEmpleadoId", mssql.Int, EmpleadoId);
-        request.input("inTipoMovimiento", mssql.VarChar(64), TipoMovimiento);
-        request.input("inMonto", mssql.Decimal(18,2), Monto);
-        request.input("inPostIP", mssql.VarChar(64), req.ip || '127.0.0.1');
-        request.input("inPostByUserId", mssql.Int, 8);
+        request.input("inValorDocumentoIdentidad", mssql.VarChar(16), documentoIdentidad);
+        request.input("inIdTipoMovimiento", mssql.Int, parseInt(TipoMovimiento));
+        request.input("inMonto", mssql.Money, parseFloat(Monto));
+        request.input("inPostByUserId", mssql.Int, 1); // Id de quien inserta
+        request.input("inPostInIP", mssql.VarChar(64), req.ip || '127.0.0.1');
         request.output("outResultCode", mssql.Int);
 
-        await request.execute("sp_InsertarMovimiento");
+        const result = await request.execute("sp_InsertarMovimiento");
 
-        const outResultCode = request.parameters.outResultCode.value;
+        const outResultCode = result.output?.outResultCode ?? 50008;
+
+        console.log("Resultado insertar movimiento:", outResultCode);
 
         if (outResultCode === 0) {
-            res.status(200).json({ mensaje: "Movimiento insertado correctamente", codigo: 0 });
+            return res.status(200).json({ mensaje: "Movimiento insertado correctamente", codigo: 0 });
         } else {
-            res.status(400).json({ mensaje: "Error al insertar movimiento", codigo: outResultCode });
+            return res.status(400).json({ mensaje: "Error al insertar movimiento", codigo: outResultCode });
         }
+
     } catch (error) {
-        console.error("Error al insertar movimiento:", error);
-        res.status(500).json({ mensaje: "Error al insertar movimiento", codigo: 500 });
+        console.error("Error interno al insertar movimiento:", error);
+        return res.status(500).json({ mensaje: "Error interno al insertar movimiento", codigo: 500 });
     }
 });
+
 
 // ================================
 // Inicio del servidor
@@ -261,6 +286,10 @@ app.listen(PORT, () => {
 });
 
 
+
+// ================================
+// Con esto se corre el server, en mi compu
+// ================================
 
 //cd "C:\Carpetas de escritorio\TEC\BDD1\Tarea1"
 //node server.js
