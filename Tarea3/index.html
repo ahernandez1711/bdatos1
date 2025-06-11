@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Empleados</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body onload="cargarEmpleados()">
+
+    <h1>Listado de Empleados</h1>
+
+    <input type="text" id="filtro" placeholder="Buscar por nombre o documento">
+    <button onclick="cargarEmpleados()">Buscar</button>
+
+    <br><br>
+
+    <table id="tabla-empleados">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Documento Identidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Empleados se llenan dinámicamente -->
+        </tbody>
+    </table>
+
+    <br>
+    <a href="insertar.html">
+        <button>Agregar Empleado</button>
+    </a>
+
+</body>
+</html>

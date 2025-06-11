@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Sistema de Planilla</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Sistema de Planilla Obrera</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="tipoUsuario">Tipo de Usuario:</label>
+                <select id="tipoUsuario" required>
+                    <option value="">Seleccione...</option>
+                    <option value="admin">Administrador</option>
+                    <option value="empleado">Empleado</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                <input type="text" id="usuario" placeholder="Ingrese su usuario" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" id="contrasena" placeholder="Ingrese su contraseña" required>
+            </div>
+            
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

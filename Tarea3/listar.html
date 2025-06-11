@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Empleados</title>
+    <link rel="stylesheet" href="../../../css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Listado de Empleados</h1>
+        <nav>
+            <ul>
+                <li><a href="../dashboard.html">Inicio</a></li>
+                <li><a href="insertar.html">Agregar Empleado</a></li>
+                <li><a href="../../../auth/logout.html">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="content">
+        <div class="search-bar">
+            <input type="text" id="filtro" placeholder="Buscar por nombre o documento">
+            <button onclick="filtrarEmpleados()">Buscar</button>
+        </div>
+        
+        <table id="tabla-empleados">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Documento</th>
+                    <th>Puesto</th>
+                    <th>Departamento</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se cargarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="../../../js/admin.js"></script>
+</body>
+</html>
