@@ -3,9 +3,21 @@ const mssql = require('mssql');
 const cors = require('cors');
 const app = express();
 const { getConnection } = require('./conexion');
+const { procesarSimulacion } = require('./simulador');
 
 app.use(cors());
 app.use(express.json());
+
+
+// ========= Rutas de simulacion
+app.post('/api/simulacion', async (req, res) => {
+    try {
+        await procesarSimulacion();
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // ========== RUTAS DE AUTENTICACIÓN ==========
 app.post("/login", async (req, res) => {
